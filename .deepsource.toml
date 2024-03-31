@@ -2,15 +2,6 @@ version = 1
 
 [[analyzers]]
 name = "python"
-enabled = true
 
-[analyzers.meta]
-type_checker = "mypy"
-
-[[transformers]]
-name = "black"
-enabled = true
-
-[[transformers]]
-name = "isort"
-enabled = true
+  [analyzers.meta]
+  runtime_version = "3.x.x"
