@@ -8,9 +8,11 @@ from fake_useragent import UserAgent
 
 class FetchTorrent:
 
-    
+    def __init__(self) -> None:
+        pass
 
 
 
 async def event_matcher(bot, event):
     Fetch = FetchTorrent()
+    pass
