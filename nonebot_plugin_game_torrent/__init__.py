@@ -14,4 +14,4 @@ with contextlib.suppress(Exception):
         extra={"author": "Cvandia", "email": "1141538825@qq.com"},
     )
 
-on_command('种子',aliases={'游戏种子','游戏下载'},priority=5,handlers=[event_matcher])
+match = on_command('种子',aliases={'游戏种子','游戏下载'},priority=25)
