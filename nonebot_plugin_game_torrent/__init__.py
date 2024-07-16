@@ -1,5 +1,7 @@
 import contextlib
+
 from nonebot import on_command
+
 from .utils import event_matcher
 
 with contextlib.suppress(Exception):
@@ -14,4 +16,4 @@ with contextlib.suppress(Exception):
         extra={"author": "Cvandia", "email": "1141538825@qq.com"},
     )
 
-match = on_command('种子',aliases={'游戏种子','游戏下载'},priority=25)
+match = on_command("种子", aliases={"游戏种子", "游戏下载"}, priority=25)
