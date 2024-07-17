@@ -15,18 +15,14 @@ match = on_command("种子", aliases={"游戏种子", "游戏下载"}, priority=
 
 @match.handle()
 async def event_matcher(
-    bot: Bot, event: Event, matcher: Matcher, search_args: Any = CommandArg()
+    bot: Bot,
+    state: T_State,
+    event: Event,
+    matcher: Matcher,
+    search_args: Any = CommandArg(),
 ):
     if game_name := str(search_args) or event.get_plaintext().split():
-        await matcher.send(f"Searching for {game_name}...")
-    else:
-        await matcher.finish("Please input the game name you want to search.")
-
-    fetch_response: dict = await GameFetcher.fetch(game_name)
-    if fetch_response["game_name"]:
-        pass
-    else:
-        await matcher.finish("No game found.")
+        matcher.set_arg("game_name", game_name)
 
 
 @match.got(
