@@ -63,8 +63,6 @@ git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
 
 </details>
 
----
-
 ## ⚙️ 配置
 ### 在env.中添加以下配置
 
@@ -77,8 +75,6 @@ git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
 |cos_delay|float|0.5|当上面的配置项为`False`时，发送图片的每张延迟s|
 
 > 注意：绝对路劲中用`/`，用`\`可能会被转义
-
----
 
 ## ⭐ 使用
 
@@ -98,8 +94,6 @@ git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
 
 指令触发方式是正则匹配的，不需要加指令前缀
 
----
-
 ## 🌙 未来
  - [x] 缓慢更新，最近学业繁忙哦~
  - [x] 随机发送cos图片
@@ -115,13 +109,9 @@ git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
 
 <center>喜欢记得点个star⭐</center>
 
----
-
 ## ❗免责声明
 
 本插件仅供**学习**和**研究**使用，使用者需自行承担使用插件的风险。作者不对插件的使用造成的任何损失或问题负责。请合理使用插件，**遵守相关法律法规**。
-
----
 
 ## 💝 特别鸣谢
 

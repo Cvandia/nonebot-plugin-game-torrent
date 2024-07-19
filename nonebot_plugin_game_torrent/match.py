@@ -61,6 +61,8 @@ async def event_matcher(
         await matcher.finish("无效的序号。")
 
     game_resource = await fetcher.fetch(tags[int(user_input) - 1])
+    if not game_resource:
+        await match.finish("未找到游戏资源。")
     if not game_resource.is_hacked:
         await match.send("警告：该游戏不是破解版，请合法下载。")
     await match.finish(str(game_resource))

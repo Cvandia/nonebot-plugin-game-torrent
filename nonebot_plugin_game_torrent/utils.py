@@ -17,19 +17,19 @@ class TorrentResource(BaseModel, extra=Extra.allow):
     game_name: str
 
     # 游戏种子链接
-    magnet: str
+    magnet: str = ""
 
-    # 游戏大小F
-    size: str
+    # 游戏大小
+    size: str = ""
 
     # 最新更新上传时间
-    last_update: str
+    last_update: str = ""
 
     # torrent资源种子的文件路劲
-    torrent_path: str
+    torrent_path: str = ""
 
     # 是否为破解版
-    is_hacked: bool
+    is_hacked: bool = False
 
     def _to_str(self) -> str:
         return plugin_config.torrent_send_format.format(**self.dict())
@@ -92,5 +92,21 @@ class GameFetcher(BaseFetcher):
         return tags
 
     async def fetch(self, tag: TorrentTag):
-        # 获取游戏种子资源(未完成)
-        raise NotImplementedError
+        response = await self.client.get(tag.url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        if figcaption := soup.find("figcaption", class_="wp-element-caption"):
+            size = figcaption.get_text().strip("Size: ")
+        if i := soup.find("i", class_="fa fa-calendar"):
+            if span := i.find_next("span"):
+                time = span.get_text().strip()
+        if figure := soup.find("figure", class_="aligncenter size-full"):
+            if a := figure.find_next("a"):
+                magnet = a["href"]  # type: ignore
+            return TorrentResource(
+                game_name=tag.game_name,
+                magnet=magnet,  # type: ignore
+                size=size,
+                last_update=time,
+                is_hacked=False,  # 未完成
+            )
+        return None
