@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
@@ -78,9 +78,18 @@ class BaseFetcher:
 
 
 class GameFetcher(BaseFetcher):
+    """
+    游戏种子资源搜索器
+    """
+
     base_url = "https://www.aimhaven.com/"
 
-    async def search(self, keyword: str):
+    async def search(self, keyword: str) -> List[TorrentTag]:
+        """
+        搜索游戏
+
+        - keyword: 搜索关键字
+        """
         self.fetch_name = keyword
         response = await self.client.get("", params={"s": keyword})
         soup = BeautifulSoup(response.text, "html.parser")
@@ -91,7 +100,12 @@ class GameFetcher(BaseFetcher):
                 tags.append(TorrentTag(game_name=a["title"], url=a["href"]))
         return tags
 
-    async def fetch(self, tag: TorrentTag):
+    async def fetch(self, tag: TorrentTag) -> Optional[TorrentResource]:
+        """
+        获取种子资源
+
+        - tag: 种子资源标签
+        """
         response = await self.client.get(tag.url)
         soup = BeautifulSoup(response.text, "html.parser")
         if figcaption := soup.find("figcaption", class_="wp-element-caption"):
