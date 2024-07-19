@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://v2.nonebot.dev/store"><img src="https://ghproxy.com/https://github.com/Cvandia/nonebot_plugin_genshin_cos/blob/main/res/ico.png" width="180" height="180" alt="NoneBotPluginLogo"></a>
+<a href="https://v2.nonebot.dev/store"><img src="./res/image.png" width="180" height="180" alt="NoneBotPluginLogo" style="border-radius: 50%;"></a>
 
 </div>
 
@@ -14,13 +14,23 @@ _⭐基于Nonebot2的获取游戏种子插件⭐_
 </div>
 
 <div align="center">
-<a href="https://www.python.org/downloads/release/python-390/"><img src="https://img.shields.io/badge/python-3.8+-blue"></a>  <a href=""><img src="https://img.shields.io/badge/QQ-1141538825-yellow"></a> <a href="https://github.com/Cvandia/nonebot-plugin-game-torrent/blob/main/LICENCE"><img src="https://img.shields.io/badge/license-MIT-blue"></a> <a href="https://v2.nonebot.dev/"><img src="https://img.shields.io/badge/Nonebot2-rc1+-red"></a>
+<a href="https://www.python.org/downloads/release/python-390/"><img src="https://img.shields.io/badge/python-3.8+-blue"></a>  <a href=""><img src="https://img.shields.io/badge/QQ-1141538825-yellow"></a> <a href="https://github.com/Cvandia/nonebot-plugin-game-torrent/blob/main/LICENCE"><img src="https://img.shields.io/badge/license-MIT-blue"></a> <a href="https://v2.nonebot.dev/"><img src="https://img.shields.io/badge/Nonebot2-2.0.0rc1+-red"></a>
 </div>
 
 
 ## ⭐ 介绍
 
-**为用户在线提供游戏种子资源**
+为用户在线提供游戏种子资源
+
+## 📜 免责声明
+
+**注意：**
+
+本插件仅供**学习**和**研究**使用，使用者需自行承担使用插件的风险。作者不对插件的使用造成的任何损失或问题负责。请合理使用插件，**遵守相关法律法规。**
+使用本插件获取游戏种子资源可能涉及到**版权问题**，请在使用过程中遵守相关法律法规，**不要传播盗版游戏**或侵犯他人权益的内容。使用者应自行承担因违反法律法规而产生的**法律责任**。
+本插件提供的游戏种子资源仅供**个人使用**，不得用于**商业目的**。使用者应自行判断是否符合使用条件，并承担因使用不当而产生的一切后果。
+使用**本插件即表示您已阅读并同意遵守以上免责声明**。如果您不同意或无法遵守以上声明，请不要使用本插件。
+
 
 ## 💿 安装
 
@@ -64,54 +74,32 @@ git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
 </details>
 
 ## ⚙️ 配置
-### 在env.中添加以下配置
 
-| 配置 | 类型 | 默认值 | 说明 |
-|:-----:|:----:|:----:|:---:|
-|cos_max|int|5|最大返回cos图片数量|
-|cos_path|str|无|不配置则默认下载到bot根目录的`"data/genshin_cos"`,支持绝对路劲如`"C:/Users/image"`和相对bot根目录路劲如`"coser/image"`
-|cos_cd|int|30|用户触发cd|
-|cos_forward_msg|bool|True|默认是否合并转发|
-|cos_delay|float|0.5|当上面的配置项为`False`时，发送图片的每张延迟s|
+**在env.中添加以下配置**
 
-> 注意：绝对路劲中用`/`，用`\`可能会被转义
+| 配置 | 类型 |必填项| 默认值 | 说明 |
+|:-----:|:----:|:----:|:---:|:----:|
+|torrent_send_format|str|否|"game: {game_name}\nsize: {size}\nlast_update: {last_update}\nmagnet: {magnet}\n"|默认发送的格式|
 
 ## ⭐ 使用
 
 ### 指令：
+> **注**: 以下命令均为command触发,实际需要在命令前加上`command_start`
+
 | 指令 | 需要@ | 范围 | 说明 |权限|
-|:--------:|:----:|:----:|:----:|:----:|
-|下载cos|否|群聊、私聊|下载热门cos图|超管、群主、管理员|
-|热门cos|否|同上|获取指定游戏热门cos图，如`热门cos 原神 x3`|全部|
-|日、周、月榜cos|否|同上|获取排行榜cos图。如`日榜cos 原神 x3`|全部|
-|最新cos|否|同上|和上面差不多，不写了，哼哼|全部|
-|精品cos|否|同上|上上面一样的道理！|全部|
-|搜索(原神\|崩坏3\|大别野\|星穹铁道)cos|否|同上|搜索米游社社区的cos图片|全部|
-|开启每日推送xx (时间)|否|仅群聊|如`开启每日推送原神 8:30`,注意时间的格式|超管、群主、管理员|
-|查看本群推送|是|群聊|查看本群的订阅cos目录|全部|
+|:---:|:---:|:---:|:---:|:---:|
+|游戏种子|否|群聊、私聊|获取游戏种子|所有人|
 
 **注意**
 
 指令触发方式是正则匹配的，不需要加指令前缀
 
 ## 🌙 未来
- - [x] 缓慢更新，最近学业繁忙哦~
- - [x] 随机发送cos图片
- - [x] 保存cos图
- - [x] 内置cd和用户触发上限
- - [x] 合并转发发送多张cos图
-
-~~playwright获取cos图~~
-~~选择发送图库方式：离线 (迅速) or 在线（缓慢、目前是的）~~
-
- - [x] 支持米游社其他社区cos获取
- - [x] 支持每日推送热榜的cos图
+ - [x] 获取种子链接供下载
+ - [ ] 上传群文件
+ - [ ] 配置下载种子文件路劲
 
 <center>喜欢记得点个star⭐</center>
-
-## ❗免责声明
-
-本插件仅供**学习**和**研究**使用，使用者需自行承担使用插件的风险。作者不对插件的使用造成的任何损失或问题负责。请合理使用插件，**遵守相关法律法规**。
 
 ## 💝 特别鸣谢
 
