@@ -45,6 +45,9 @@ class TorrentTag(BaseModel):
     game_name: str
     url: str
 
+    def __str__(self) -> str:
+        return f"{self.game_name}\n{self.url}"
+
 
 class BaseFetcher:
     fetch_name: str = ""
@@ -78,7 +81,9 @@ class GameFetcher(BaseFetcher):
 
     async def search(self, keyword: str) -> List[TorrentTag]:
         self.fetch_name = keyword
+        # 搜索游戏(未完成)
         raise NotImplementedError
 
     async def fetch(self, tag: TorrentTag) -> TorrentResource:
+        # 获取游戏种子资源(未完成)
         raise NotImplementedError

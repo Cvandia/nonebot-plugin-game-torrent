@@ -33,27 +33,25 @@ async def handle_game_name(
 
     # 取消继续对话（未完成）
     game_fetcher: GameFetcher = state["Fetcher"]
-    game_name = state["game_name"]
     tags = await game_fetcher.search(game_name)
     if not tags:
         await match.finish("No game found.")
     state["tags"] = tags
-    send_message = "\n".join([str(i) for i in tags])
+    send_message = "here are the search results:\n".join(
+        f"{index}, {tag}" for index, tag in enumerate(tags)
+    )
     await match.finish(send_message)
 
 
-@match.got(
-    "game_index", prompt="Please input the index of the game you want to download."
-)
+@match.got("index", prompt="Please input the index of the game you want to download.")
 async def handle_game_index(
     bot: Bot, event: Event, state: T_State, index: str = ArgPlainText()
 ):
 
     # 取消继续对话（未完成）
     game_fetcher: GameFetcher = state["Fetcher"]
-    game_index = state["game_index"]
     tags: List[TorrentTag] = state["tags"]
-    game_resource = await game_fetcher.fetch(tags[game_index])
+    game_resource = await game_fetcher.fetch(tags[int(index)])
     if not game_resource.is_hacked:
         await match.send(
             "warning: This game is not a cracked version, please download it legally."

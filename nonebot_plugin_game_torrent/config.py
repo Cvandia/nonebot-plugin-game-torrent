@@ -1,7 +1,7 @@
 from typing import Optional
 
-from nonebot import get_driver
-from pydantic import BaseModel, Extra
+from nonebot import get_driver, get_plugin_config
+from pydantic import BaseModel
 
 
 class Config(BaseModel):
@@ -16,4 +16,4 @@ class Config(BaseModel):
     upload_torrent: bool = False
 
 
-plugin_config = Config(**get_driver().config.dict())
+plugin_config = get_plugin_config(Config)
