@@ -1,14 +1,14 @@
 from typing import Any, List
 
-from nonebot import on_command
+from nonebot import on_command, require
 from nonebot.adapters import Bot, Event
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
-from nonebot.rule import Rule
+
+require("nonebot_plugin_waiter")
 from nonebot_plugin_waiter import waiter
 
-from .config import plugin_config
-from .utils import GameFetcher, TorrentResource, TorrentTag
+from .utils import GameFetcher, TorrentTag
 
 match = on_command("种子", aliases={"游戏种子", "游戏下载"}, priority=25)
 
