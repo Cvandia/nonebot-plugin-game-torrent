@@ -12,6 +12,7 @@ with contextlib.suppress(Exception):
         usage="Just type the game name you want to search.",
         homepage="https://github.com/Cvandia/nonebot-plugin-game-torrent",
         config=Config,
+        type="application",
         supported_adapters=None,
         extra={"author": "Cvandia", "email": "1141538825@qq.com"},
     )
