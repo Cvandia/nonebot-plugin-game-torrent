@@ -1,5 +1,6 @@
-from typing import List, Optional
+from typing import Optional
 
+from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from httpx import AsyncClient
 from pydantic import BaseModel, Extra
@@ -79,11 +80,17 @@ class BaseFetcher:
 class GameFetcher(BaseFetcher):
     base_url = "https://www.aimhaven.com/"
 
-    async def search(self, keyword: str) -> List[TorrentTag]:
+    async def search(self, keyword: str):
         self.fetch_name = keyword
-        # 搜索游戏(未完成)
-        raise NotImplementedError
+        response = await self.client.get("", params={"s": keyword})
+        soup = BeautifulSoup(response.text, "html.parser")
+        tags = []
+        if h2s := soup.find_all("h2", class_="title front-view-title"):
+            for h2 in h2s:
+                a = h2.find("a")
+                tags.append(TorrentTag(game_name=a["title"], url=a["href"]))
+        return tags
 
-    async def fetch(self, tag: TorrentTag) -> TorrentResource:
+    async def fetch(self, tag: TorrentTag):
         # 获取游戏种子资源(未完成)
         raise NotImplementedError

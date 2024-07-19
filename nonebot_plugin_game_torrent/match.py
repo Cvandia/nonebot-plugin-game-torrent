@@ -3,9 +3,9 @@ from typing import Any, List
 from nonebot import on_command
 from nonebot.adapters import Bot, Event
 from nonebot.matcher import Matcher
-from nonebot.params import ArgPlainText, CommandArg
+from nonebot.params import CommandArg
 from nonebot.rule import Rule
-from nonebot.typing import T_State
+from nonebot_plugin_waiter import waiter
 
 from .config import plugin_config
 from .utils import GameFetcher, TorrentResource, TorrentTag
@@ -13,51 +13,55 @@ from .utils import GameFetcher, TorrentResource, TorrentTag
 match = on_command("种子", aliases={"游戏种子", "游戏下载"}, priority=25)
 
 
+async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> str:
+    """
+    使用waiter获取用户输入
+    """
+    await matcher.send(prompt)
+
+    @waiter(waits=["message"], keep_session=True)
+    async def wait_for_user_input(event: Event):
+        return event.get_plaintext()
+
+    user_input = await wait_for_user_input.wait(timeout=timeout)
+    if not user_input:
+        await matcher.finish("输入超时。")
+    elif user_input.lower() in ["取消", "cancel"]:
+        await matcher.finish("操作已取消。")
+    return user_input
+
+
 @match.handle()
 async def event_matcher(
     bot: Bot,
-    state: T_State,
     event: Event,
     matcher: Matcher,
     search_args: Any = CommandArg(),
 ):
-    if game_name := str(search_args) or event.get_plaintext().split():
-        matcher.set_arg("game_name", game_name)
-        state["Fetcher"] = GameFetcher()
-
-
-@match.got("game_name", prompt="Please input the name of the game you want to search.")
-async def handle_game_name(
-    bot: Bot, event: Event, state: T_State, game_name: str = ArgPlainText()
-):
-
-    # 取消继续对话（未完成）
-    game_fetcher: GameFetcher = state["Fetcher"]
-    tags = await game_fetcher.search(game_name)
-    if not tags:
-        await match.finish("No game found.")
-    state["tags"] = tags
-    send_message = "here are the search results:\n".join(
-        f"{index}, {tag}" for index, tag in enumerate(tags)
-    )
-    await match.finish(send_message)
-
-
-@match.got("index", prompt="Please input the index of the game you want to download.")
-async def handle_game_index(
-    bot: Bot, event: Event, state: T_State, index: str = ArgPlainText()
-):
-
-    # 取消继续对话（未完成）
-    game_fetcher: GameFetcher = state["Fetcher"]
-    tags: List[TorrentTag] = state["tags"]
-    game_resource = await game_fetcher.fetch(tags[int(index)])
-    if not game_resource.is_hacked:
-        await match.send(
-            "warning: This game is not a cracked version, please download it legally."
+    game_name = str(search_args).strip()
+    if not game_name:
+        game_name = await get_user_input(
+            matcher, "请输入您想搜索的游戏名称。(仅支持英文搜索)"
         )
-        await match.finish(str(game_resource))
-    else:
-        await match.finish(str(game_resource))
 
+    fetcher = GameFetcher()
+    await match.send("正在搜索...")
+    tags: List[TorrentTag] = await fetcher.search(game_name)  # 搜索游戏
+
+    if not tags:
+        await match.finish("未找到游戏。")
+
+    await match.send(
+        "以下是搜索结果：\n"
+        + "\n".join(f"{index+1}. {tag}\n" for index, tag in enumerate(tags))
+    )
+    user_input = await get_user_input(matcher, "请输入您想下载的游戏的序号。")
+
+    if not user_input.isdigit() or int(user_input) >= len(tags):
+        await matcher.finish("无效的序号。")
+
+    game_resource = await fetcher.fetch(tags[int(user_input) - 1])
+    if not game_resource.is_hacked:
+        await match.send("警告：该游戏不是破解版，请合法下载。")
+    await match.finish(str(game_resource))
     # 上传种子文件至群文件（未完成）
