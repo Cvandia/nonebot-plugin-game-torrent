@@ -12,7 +12,7 @@ repos:
         stages: [Nonepre-commitNone]
 
   - repo: https://github.com/psf/black
-    rev: 24.8.0
+    rev: 24.10.0
     hooks:
       - id: black
         stages: [Nonepre-commitNone]
