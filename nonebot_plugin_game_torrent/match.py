@@ -1,14 +1,15 @@
 from typing import Any, List
 
 from nonebot import on_command, require
-from nonebot.adapters import Bot, Event
+from nonebot.adapters import Event
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 
 require("nonebot_plugin_waiter")
-from nonebot_plugin_waiter import waiter
 
-from .utils import GameFetcher, TorrentTag
+from nonebot_plugin_waiter import waiter  # noqa
+
+from .utils import GameFetcher, TorrentTag  # noqa
 
 match = on_command("种子", aliases={"游戏种子", "游戏下载"}, priority=25)
 
@@ -33,8 +34,6 @@ async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> st
 
 @match.handle()
 async def event_matcher(
-    bot: Bot,
-    event: Event,
     matcher: Matcher,
     search_args: Any = CommandArg(),
 ):

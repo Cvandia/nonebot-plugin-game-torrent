@@ -1,0 +1,9 @@
+# DeepSource configuration file
+# Learn how to configure: https://docs.deepsource.com/docs/configuration
+version = 1
+exclude_patterns = ["venv"]
+test_patterns = ["**/test_*.py"]
+
+[[analyzers]]
+  name = "python"
+  enabled = true

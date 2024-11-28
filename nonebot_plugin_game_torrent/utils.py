@@ -3,12 +3,12 @@ from typing import List, Optional
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from httpx import AsyncClient
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 
 from .config import plugin_config
 
 
-class TorrentResource(BaseModel, extra=Extra.allow):
+class TorrentResource(BaseModel):
     """
     ### 游戏种子资源
     """
@@ -17,16 +17,16 @@ class TorrentResource(BaseModel, extra=Extra.allow):
     game_name: str
 
     # 游戏种子链接
-    magnet: str = ""
+    magnet: str
 
     # 游戏大小
-    size: str = ""
+    size: str
 
     # 最新更新上传时间
-    last_update: str = ""
+    last_update: str
 
     # torrent资源种子的文件路劲
-    torrent_path: str = ""
+    torrent_path: str
 
     # 是否为破解版
     is_hacked: bool = False
