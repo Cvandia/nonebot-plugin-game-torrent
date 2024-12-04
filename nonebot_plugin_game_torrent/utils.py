@@ -3,7 +3,7 @@ from typing import Optional
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from httpx import AsyncClient
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .config import plugin_config
 
@@ -26,7 +26,7 @@ class TorrentResource(BaseModel):
     last_update: str
 
     # torrent资源种子的文件路劲
-    torrent_path: str
+    torrent_path: str = Field(default="")
 
     # 是否为破解版
     is_hacked: bool = False
