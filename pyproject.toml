@@ -13,15 +13,19 @@ dependencies = [
     "bs4<1.0.0,>=0.0.2",
     "nonebot2>=2.2.0",
 ]
-requires-python = "<4.0,>=3.9"
+requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
 
 [tool.pdm]
-distribution = false
+distribution = true
 
 [tool.pdm.build]
 includes = ["nonebot_plugin_game_torrent"]
 
 [dependency-groups]
 dev = ["ruff>=0.8.1"]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
