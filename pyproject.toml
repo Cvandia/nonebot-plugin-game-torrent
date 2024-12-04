@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-game-torrent"
-version = "0.1.5"
+version = "0.1.6"
 description = "a plugin for nonebot to fetch game torrent from Aimheaven"
 authors = [
     {name = "Cvandia", email = "106718176+Cvandia@users.noreply.github.com"},
