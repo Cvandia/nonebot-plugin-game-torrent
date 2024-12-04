@@ -1,21 +1,27 @@
-[tool.poetry]
+[project]
 name = "nonebot-plugin-game-torrent"
-version = "0.1.4"
+version = "0.1.5"
 description = "a plugin for nonebot to fetch game torrent from Aimheaven"
-authors = ["Cvandia"]
-license = "MIT"
+authors = [
+    {name = "Cvandia", email = "106718176+Cvandia@users.noreply.github.com"},
+    {name = "Cvandia"},
+]
+dependencies = [
+    "httpx>=0.27.0",
+    "fake-useragent<2.0.0,>=1.1.3",
+    "nonebot-plugin-waiter>=0.6.2",
+    "bs4<1.0.0,>=0.0.2",
+    "nonebot2>=2.2.0",
+]
+requires-python = "<4.0,>=3.9"
 readme = "README.md"
-packages = [{include = "nonebot_plugin_game_torrent"}]
+license = {text = "MIT"}
 
-[tool.poetry.dependencies]
-python = ">=3.9,<4.0"
-httpx = ">=0.27.0"
-fake-useragent = "^1.1.3"
-nonebot-plugin-waiter = ">=0.6.2"
-bs4 = "^0.0.2"
-nonebot2 = ">=2.2.0"
+[tool.pdm]
+distribution = false
 
+[tool.pdm.build]
+includes = ["nonebot_plugin_game_torrent"]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = ["ruff>=0.8.1"]

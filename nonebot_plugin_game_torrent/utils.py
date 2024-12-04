@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
@@ -84,7 +84,7 @@ class GameFetcher(BaseFetcher):
 
     base_url = "https://www.aimhaven.com/"
 
-    async def search(self, keyword: str) -> List[TorrentTag]:
+    async def search(self, keyword: str) -> list[TorrentTag]:
         """
         搜索游戏
 
@@ -110,9 +110,10 @@ class GameFetcher(BaseFetcher):
         soup = BeautifulSoup(response.text, "html.parser")
         if figcaption := soup.find("figcaption", class_="wp-element-caption"):
             size = figcaption.get_text().strip("Size: ")
-        if i := soup.find("i", class_="fa fa-calendar"):
-            if span := i.find_next("span"):
-                time = span.get_text().strip()
+        if (i := soup.find("i", class_="fa fa-calendar")) and (
+            span := i.find_next("span")
+        ):
+            time = span.get_text().strip()
         if figure := soup.find("figure", class_="aligncenter size-full"):
             if a := figure.find_next("a"):
                 magnet = a["href"]  # type: ignore

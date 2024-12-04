@@ -1,15 +1,15 @@
 import contextlib
 
+from . import match  # noqa
 from .config import Config
-from .match import *
 
 with contextlib.suppress(Exception):
     from nonebot.plugin import PluginMetadata
 
     __plugin_meta__ = PluginMetadata(
-        name="nonebot_plugin_game_torrent",
-        description="A plugin for nonebot2 to get torrent games.",
-        usage="Just type the game name you want to search.",
+        name="游戏种子搜索",
+        description="搜索游戏种子资源",
+        usage="种子 [游戏名称]",
         homepage="https://github.com/Cvandia/nonebot-plugin-game-torrent",
         config=Config,
         type="application",
