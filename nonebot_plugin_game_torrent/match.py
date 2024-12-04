@@ -1,3 +1,5 @@
+from typing import Any
+
 from nonebot import on_command, require
 from nonebot.adapters import Event
 from nonebot.matcher import Matcher
@@ -33,7 +35,7 @@ async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> st
 @match.handle()
 async def event_matcher(
     matcher: Matcher,
-    search_args: str = CommandArg(),
+    search_args: Any = CommandArg(),  # noqa
 ):
     game_name = str(search_args).strip()
     if not game_name:
