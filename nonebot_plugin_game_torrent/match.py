@@ -56,7 +56,7 @@ async def event_matcher(
     )
     user_input = await get_user_input(matcher, "请输入您想下载的游戏的序号。")
 
-    if not user_input.isdigit() or int(user_input) >= len(tags):
+    if not user_input.isdigit() or int(user_input) > len(tags):
         await matcher.finish("无效的序号。")
 
     game_resource = await fetcher.fetch(tags[int(user_input) - 1])
