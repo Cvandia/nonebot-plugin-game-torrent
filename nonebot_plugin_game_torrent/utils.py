@@ -1,6 +1,6 @@
 from typing import Optional
 
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from httpx import AsyncClient
 from pydantic import BaseModel, Field
@@ -119,12 +119,11 @@ class GameFetcher(BaseFetcher):
         is_hacked = True
         if soup.find("mark", class_="has-vivid-red-color"):
             is_hacked = False
-        figures: list[Tag] = soup.find_all("figure", class_="aligncenter")
-        if len(figures) > 1:
-            figure = figures[1]
-        figure = figures[0]
-        if a := figure.find_next("a"):
-            magnet = a["href"]  # type: ignore
+        figure = soup.find("figure", class_="aligncenter")
+        if a := figure.find("a"):
+            if figure := figure.find_next("figure", class_="aligncenter"):
+                a = figure.find("a")
+            magnet = a["href"]
             return TorrentResource(
                 game_name=tag.game_name,
                 magnet=magnet,  # type: ignore
