@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 
 from .config import plugin_config
 
+torrent_send_format = plugin_config.torrent_send_format
+
 
 class TorrentResource(BaseModel):
     """
@@ -29,10 +31,10 @@ class TorrentResource(BaseModel):
     torrent_path: str = Field(default="")
 
     # 是否为破解版
-    is_hacked: bool = False
+    is_hacked: bool = True
 
     def _to_str(self) -> str:
-        return plugin_config.torrent_send_format.format(**self.dict())
+        return torrent_send_format.format(**self.dict())
 
     def __str__(self) -> str:
         return self._to_str()
@@ -114,14 +116,16 @@ class GameFetcher(BaseFetcher):
             span := i.find_next("span")
         ):
             time = span.get_text().strip()
-        if figure := soup.find("figure", class_="aligncenter size-full"):
-            if a := figure.find_next("a"):
-                magnet = a["href"]  # type: ignore
+        if soup.find("mark", class_="has-vivid-red-color"):
+            is_hacked = False
+        figure = soup.find("figure", class_="aligncenter size-full")
+        if a := figure.find_next("a"):
+            magnet = a["href"]  # type: ignore
             return TorrentResource(
                 game_name=tag.game_name,
                 magnet=magnet,  # type: ignore
                 size=size,
                 last_update=time,
-                is_hacked=False,  # 未完成
+                is_hacked=is_hacked,
             )
         return None
