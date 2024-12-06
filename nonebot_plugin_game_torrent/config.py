@@ -1,3 +1,8 @@
+"""
+File: config.py
+    Description: 插件配置文件
+"""
+
 from typing import Optional
 
 from nonebot import get_plugin_config

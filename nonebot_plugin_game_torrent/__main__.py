@@ -1,3 +1,8 @@
+"""
+File: __main__.py
+    Description: 插件主要mathcer逻辑
+"""
+
 from typing import Any
 
 from nonebot import on_command, require
@@ -7,9 +12,14 @@ from nonebot.params import CommandArg
 
 require("nonebot_plugin_waiter")
 
+from typing import TYPE_CHECKING
+
 from nonebot_plugin_waiter import waiter
 
-from .utils import GameFetcher, TorrentTag
+from .Aimhaven import AimhavenFetcher as GameFetcher
+
+if TYPE_CHECKING:
+    from .base_model import TorrentTag
 
 match = on_command("种子", aliases={"游戏种子", "游戏下载"}, priority=25)
 

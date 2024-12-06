@@ -94,7 +94,8 @@ git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
  - [x] 获取种子链接供下载
  - [ ] 上传群文件
  - [ ] 配置下载种子文件路劲
- - [ ] 添加更多种子获取网站
+ ~~- [ ] 添加更多种子获取网站~~
+- [x] 添加[Aimhaven](https://aimhaven.com/)的种子获取
 
 <center>喜欢记得点个star⭐</center>
 

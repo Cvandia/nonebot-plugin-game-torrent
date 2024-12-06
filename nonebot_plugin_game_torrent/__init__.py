@@ -1,6 +1,6 @@
 import contextlib
 
-from . import match  # noqa
+from . import __main__  # noqa
 from .config import Config
 
 with contextlib.suppress(Exception):
