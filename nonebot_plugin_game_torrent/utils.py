@@ -116,9 +116,10 @@ class GameFetcher(BaseFetcher):
             span := i.find_next("span")
         ):
             time = span.get_text().strip()
+        is_hacked = True
         if soup.find("mark", class_="has-vivid-red-color"):
             is_hacked = False
-        figure = soup.find("figure", class_="aligncenter size-full")
+        figure = soup.find("figure", class_="aligncenter")
         if a := figure.find_next("a"):
             magnet = a["href"]  # type: ignore
             return TorrentResource(
