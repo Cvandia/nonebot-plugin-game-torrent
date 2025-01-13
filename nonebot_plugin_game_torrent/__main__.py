@@ -62,7 +62,7 @@ async def event_matcher(
 
     await match.send(
         "以下是搜索结果：\n"
-        + "\n".join(f"{index+1}. {tag}\n" for index, tag in enumerate(tags))
+        + "\n".join(f"{index + 1}. {tag}\n" for index, tag in enumerate(tags))
     )
     user_input = await get_user_input(matcher, "请输入您想下载的游戏的序号。")
 
