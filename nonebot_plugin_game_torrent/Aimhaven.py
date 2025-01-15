@@ -1,8 +1,8 @@
 """
-Time: 2024/12/06
+Time: 2025/1/15
 
-File: Aimehaven.py
-    Description: Aimehaven.com 爬取类
+File: aimehaven.py
+    Description: Aimehaven.com 爬取类, 继承自BaseFetcher, 主要实现了search和fetch方法
 
 Author: Cvandia
 """
@@ -20,6 +20,7 @@ class AimhavenFetcher(BaseFetcher):
     """
 
     base_url = "https://www.aimhaven.com/"
+    fetch_name = "Aimhaven"
 
     async def search(self, keyword: str) -> list[TorrentTag]:
         """
@@ -27,7 +28,6 @@ class AimhavenFetcher(BaseFetcher):
 
         - keyword: 搜索关键字
         """
-        self.fetch_name = keyword
         response = await self.client.get("", params={"s": keyword})
         soup = BeautifulSoup(response.text, "html.parser")
         tags = []

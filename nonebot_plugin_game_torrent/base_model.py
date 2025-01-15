@@ -49,15 +49,19 @@ class TorrentTag(BaseModel):
     种子资源的标签
     """
 
+    # 游戏名称
     game_name: str
+    # 游戏链接，可以是搜索链接，也可以是具体的游戏链接
     url: str
 
     def __str__(self) -> str:
-        return f"{self.game_name}\n{self.url}"
+        return f"name:{self.game_name}\nlink:{self.url}\n"
 
 
 class BaseFetcher:
+    # 爬取源的名称
     fetch_name: str = ""
+    # 爬取源的基础url
     base_url: str = ""
     _client: Optional[AsyncClient] = None
 
