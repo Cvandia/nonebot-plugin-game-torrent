@@ -58,7 +58,7 @@ async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> st
     user_input = await wait_for_user_input.wait(timeout=timeout)
     if not user_input:
         await matcher.finish("输入超时。")
-    elif user_input.lower() in ["取消", "cancel"]:
+    elif user_input.lower() in ["取消", "cancel", "quit", "q"]:
         await matcher.finish("操作已取消。")
     return user_input
 
