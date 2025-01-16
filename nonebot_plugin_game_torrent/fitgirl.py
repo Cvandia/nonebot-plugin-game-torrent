@@ -1,3 +1,12 @@
+"""
+Time: 2025/1/16
+
+File: fitgirl.py
+    Description: fitgirl 网站, 继承自BaseFetcher, 主要实现了search和fetch方法
+
+Author: Cvandia
+"""
+
 import re
 from typing import Optional
 
