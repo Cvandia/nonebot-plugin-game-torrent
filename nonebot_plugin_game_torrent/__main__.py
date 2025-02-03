@@ -83,7 +83,7 @@ async def event_matcher(
 
     await match.send(
         "以下是搜索结果：\n"
-        + "\n".join(f"{index+1}. {tag}\n" for index, tag in enumerate(tags))
+        + "\n".join(f"{index + 1}. {tag}\n" for index, tag in enumerate(tags))
     )
     user_input = await get_user_input(matcher, "请输入您想下载的游戏的序号。")
 
@@ -107,7 +107,7 @@ async def _(matcher: Matcher):
         + "\n"
         + "源列表：\n"
         + "\n".join(
-            f"{index+1}. {fetcher.fetch_name}"
+            f"{index + 1}. {fetcher.fetch_name}"
             for index, fetcher in enumerate(g_source._list)
         )
     )
