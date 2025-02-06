@@ -23,8 +23,8 @@ class FitgirlFetcher(BaseFetcher):
     fetch_name = "Fitgirl"
     base_url = "https://fitgirl-repacks.site/"
 
-    async def search(cls, keyword: str) -> list[TorrentTag]:
-        rsp = await cls.client.get("", params={"s": keyword})
+    async def search(self, keyword: str) -> list[TorrentTag]:
+        rsp = await self.client.get("", params={"s": keyword})
         soup = BeautifulSoup(rsp.text, "html.parser")
         tags = []
         for h1 in soup.find_all("h1", class_="entry-title"):
