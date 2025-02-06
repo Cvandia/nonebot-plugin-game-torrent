@@ -3,13 +3,14 @@ File: base_model.py
     Description: 基础爬取class, 后续的爬取类都继承这个类
 """
 
-from typing import Optional
+from abc import ABC, abstractmethod
+from typing import ClassVar, Optional
 
 from fake_useragent import UserAgent
 from httpx import AsyncClient
 from pydantic import BaseModel, Field
 
-from .config import plugin_config
+from ..config import plugin_config  # noqa: TID252
 
 torrent_send_format = plugin_config.torrent_send_format
 
@@ -58,44 +59,44 @@ class TorrentTag(BaseModel):
         return f"name:{self.game_name}\nlink:{self.url}\n"
 
 
-class BaseFetcher:
+class BaseFetcher(ABC):
     # 爬取源的名称
-    fetch_name: str = ""
+    fetch_name: str
     # 爬取源的基础url
-    base_url: str = ""
+    base_url: str
     _client: Optional[AsyncClient] = None
 
-    def __init__(self) -> None:
-        self.headers = {
-            "User-Agent": UserAgent().chrome,
-        }
+    _headers: ClassVar[dict] = {
+        "User-Agent": UserAgent().chrome,
+    }
 
     @property
     def client(self) -> AsyncClient:
         if not self._client:
             self._client = AsyncClient(
                 base_url=self.base_url or "",
-                headers=self.headers,
+                headers=self._headers,
                 timeout=100,
             )
         return self._client
 
-    def set_headers(self, key: str, value: str) -> None:
+    @classmethod
+    def set_headers(cls, key: str, value: str) -> None:
         """
         设置请求头
         """
-        self.headers[key] = value
+        cls._headers[key] = value
 
+    @abstractmethod
     async def search(self, keyword: str) -> list[TorrentTag]:
         """
         搜索种子资源
 
         - keyword: 搜索关键字
         """
-        raise NotImplementedError
 
+    @abstractmethod
     async def fetch(self, tag: TorrentTag) -> Optional[TorrentResource]:
         """
         获取种子资源
         """
-        raise NotImplementedError

@@ -16,11 +16,15 @@ from .base_model import BaseFetcher, TorrentResource, TorrentTag
 
 
 class FitgirlFetcher(BaseFetcher):
+    """
+    fitgirl 网站, 继承自BaseFetcher, 主要实现了search和fetch方法
+    """
+
     fetch_name = "Fitgirl"
     base_url = "https://fitgirl-repacks.site/"
 
-    async def search(self, keyword: str) -> list[TorrentTag]:
-        rsp = await self.client.get("", params={"s": keyword})
+    async def search(cls, keyword: str) -> list[TorrentTag]:
+        rsp = await cls.client.get("", params={"s": keyword})
         soup = BeautifulSoup(rsp.text, "html.parser")
         tags = []
         for h1 in soup.find_all("h1", class_="entry-title"):

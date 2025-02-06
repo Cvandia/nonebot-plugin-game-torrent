@@ -18,12 +18,10 @@ from typing import TYPE_CHECKING
 from nonebot_plugin_waiter import waiter
 
 # 新的源在此导入
-from .aimhaven import AimhavenFetcher
-from .base_model import BaseFetcher
-from .fitgirl import FitgirlFetcher
+from .fetcher import AHF, FGF, BaseFetcher
 
 if TYPE_CHECKING:
-    from .base_model import TorrentTag
+    from .fetcher import TorrentTag
 
 
 @dataclass
@@ -36,9 +34,7 @@ class Source:
     _index: int = 0
 
 
-g_source = Source(
-    _list=[AimhavenFetcher(), FitgirlFetcher()], _index=0
-)  # 新的源在此添加
+g_source = Source(_list=[AHF(), FGF()], _index=0)  # 在此添加新的源
 
 match = on_command("种子", aliases={"游戏种子", "游戏下载"}, priority=25)
 show_source = on_command("显示源", aliases={"显示种子库", "全部源"}, priority=26)
