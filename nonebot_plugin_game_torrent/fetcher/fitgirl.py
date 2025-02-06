@@ -11,7 +11,9 @@ import re
 from typing import Optional
 
 from bs4 import BeautifulSoup
+from httpx import HTTPError
 
+from ..exception import RequestError  # noqa: TID252
 from .base_model import BaseFetcher, TorrentResource, TorrentTag
 
 
@@ -24,7 +26,10 @@ class FitgirlFetcher(BaseFetcher):
     base_url = "https://fitgirl-repacks.site/"
 
     async def search(self, keyword: str) -> list[TorrentTag]:
-        rsp = await self.client.get("", params={"s": keyword})
+        try:
+            rsp = await self.client.get("", params={"s": keyword})
+        except HTTPError as e:
+            raise RequestError(f"fitgirl search error: {e}") from e
         soup = BeautifulSoup(rsp.text, "html.parser")
         tags = []
         for h1 in soup.find_all("h1", class_="entry-title"):
@@ -33,7 +38,10 @@ class FitgirlFetcher(BaseFetcher):
         return tags
 
     async def fetch(self, tag: TorrentTag) -> Optional[TorrentResource]:
-        rsp = await self.client.get(tag.url)
+        try:
+            rsp = await self.client.get(tag.url)
+        except HTTPError as e:
+            raise RequestError(f"fitgirl fetch error: {e}") from e
         soup = BeautifulSoup(rsp.text, "html.parser")
         magnet = soup.find("a", href=lambda href: href and href.startswith("magnet:"))
         size_element = soup.find(string=re.compile(r"Original Size:")).find_next(

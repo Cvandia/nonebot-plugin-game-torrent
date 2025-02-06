@@ -10,7 +10,9 @@ Author: Cvandia
 from typing import Optional
 
 from bs4 import BeautifulSoup
+from httpx import HTTPError
 
+from ..exception import RequestError  # noqa: TID252
 from .base_model import BaseFetcher, TorrentResource, TorrentTag
 
 
@@ -28,7 +30,10 @@ class AimhavenFetcher(BaseFetcher):
 
         - keyword: 搜索关键字
         """
-        response = await self.client.get("", params={"s": keyword})
+        try:
+            response = await self.client.get("", params={"s": keyword})
+        except HTTPError as e:
+            raise RequestError(f"Aimhaven search error: {e}") from e
         soup = BeautifulSoup(response.text, "html.parser")
         tags = []
         if h2s := soup.find_all("h2", class_="title front-view-title"):
@@ -43,7 +48,10 @@ class AimhavenFetcher(BaseFetcher):
 
         - tag: 种子资源标签
         """
-        response = await self.client.get(tag.url)
+        try:
+            response = await self.client.get(tag.url)
+        except HTTPError as e:
+            raise RequestError(f"Aimhaven fetch error: {e}") from e
         soup = BeautifulSoup(response.text, "html.parser")
         if figcaption := soup.find("figcaption", class_="wp-element-caption"):
             size = figcaption.get_text().strip("Size: ")

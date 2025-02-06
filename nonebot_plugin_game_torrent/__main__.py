@@ -17,6 +17,8 @@ from typing import TYPE_CHECKING
 
 from nonebot_plugin_waiter import waiter
 
+from .exception import RequestError
+
 # 新的源在此导入
 from .fetcher import AHF, FGF, BaseFetcher
 
@@ -72,7 +74,10 @@ async def event_matcher(
 
     fetcher = g_source._list[g_source._index]
     await match.send("正在搜索...")
-    tags: list[TorrentTag] = await fetcher.search(keyword=game_name)  # 搜索游戏
+    try:
+        tags: list[TorrentTag] = await fetcher.search(keyword=game_name)  # 搜索游戏
+    except RequestError as e:
+        await match.finish(f"搜索失败: {e}")
 
     if not tags:
         await match.finish("未找到游戏。")
@@ -85,8 +90,10 @@ async def event_matcher(
 
     if not user_input.isdigit() or int(user_input) > len(tags) or int(user_input) < 1:
         await matcher.finish("无效的序号。")
-
-    game_resource = await fetcher.fetch(tags[int(user_input) - 1])
+    try:
+        game_resource = await fetcher.fetch(tags[int(user_input) - 1])
+    except RequestError as e:
+        await match.finish(f"获取游戏资源失败: {e}")
     if not game_resource:
         await match.finish("未找到游戏资源。")
     if not game_resource.is_hacked:
