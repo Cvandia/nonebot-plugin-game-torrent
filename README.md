@@ -17,6 +17,7 @@ _⭐基于Nonebot2的获取游戏种子插件⭐_
 <a href="https://www.python.org/downloads/release/python-390/"><img src="https://img.shields.io/badge/python-3.8+-blue"></a>  <a href=""><img src="https://img.shields.io/badge/QQ-1141538825-yellow"></a> <a href="https://github.com/Cvandia/nonebot-plugin-game-torrent/blob/main/LICENCE"><img src="https://img.shields.io/badge/license-MIT-blue"></a> <a href="https://v2.nonebot.dev/"><img src="https://img.shields.io/badge/Nonebot2-2.0.0rc1+-red"></a>
 </div>
 
+---
 
 ## ⭐ 介绍
 
@@ -24,9 +25,8 @@ _⭐基于Nonebot2的获取游戏种子插件⭐_
 
 ## 📜 免责声明
 
-**注意：**
-
-本插件仅供**学习**和**研究**使用，使用者需自行承担使用插件的风险。作者不对插件的使用造成的任何损失或问题负责。请合理使用插件，**遵守相关法律法规。**
+> [!CAUTION]
+> 本插件仅供**学习**和**研究**使用，使用者需自行承担使用插件的风险。作者不对插件的使用造成的任何损失或问题负责。请合理使用插件，**遵守相关法律法规。**
 使用本插件获取游戏种子资源可能涉及到**版权问题**，请在使用过程中遵守相关法律法规，**不要传播盗版游戏**或侵犯他人权益的内容。使用者应自行承担因违反法律法规而产生的**法律责任**。
 本插件提供的游戏种子资源仅供**个人使用**，不得用于**商业目的**。使用者应自行判断是否符合使用条件，并承担因使用不当而产生的一切后果。
 使用**本插件即表示您已阅读并同意遵守以上免责声明**。如果您不同意或无法遵守以上声明，请不要使用本插件。
@@ -77,21 +77,23 @@ git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
 
 **在env.中添加以下配置**
 
-| 配置 | 类型 |必填项| 默认值 | 说明 |
-|:-----:|:----:|:----:|:---:|:----:|
-|torrent_send_format|str|否|"game: {game_name}\nsize: {size}\nlast_update: {last_update}\nmagnet: {magnet}\n"|默认发送的格式|
+|        配置         | 类型  | 必填项 |                                      默认值                                       |             说明             |
+| :-----------------: | :---: | :----: | :-------------------------------------------------------------------------------: | :--------------------------: |
+| torrent_send_format |  str  |   否   | "game: {game_name}\nsize: {size}\nlast_update: {last_update}\nmagnet: {magnet}\n" |        默认发送的格式        |
+|  magnet_to_qrcode   | bool  |   否   |                                       True                                        | 是否将magnet链接转换为二维码 |
 
 ## ⭐ 使用
 
 ### 指令：
 > **注**: 以下命令均为command触发,实际需要在命令前加上`command_start`
 
-| 指令 | 需要@ | 范围 | 说明 |权限|
-|:---:|:---:|:---:|:---:|:---:|
-|游戏种子|否|群聊、私聊|获取游戏种子|所有人|
+|   指令   | 需要@ |    范围    |     说明     |  权限  |
+| :------: | :---: | :--------: | :----------: | :----: |
+| 游戏种子 |  否   | 群聊、私聊 | 获取游戏种子 | 所有人 |
 
 ## 🌙 未来
  - [x] 获取种子链接供下载
+ - [x] 链接转二维码
  - [ ] 上传群文件
  - [ ] 配置下载种子文件路劲
  ~~- [ ] 添加更多种子获取网站~~
