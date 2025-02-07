@@ -16,5 +16,7 @@ class Config(BaseModel):
 
     # TODO 是否上传种子文件至群文件
 
+    magnet_to_qrcode: bool = False
+
 
 plugin_config = get_plugin_config(Config)

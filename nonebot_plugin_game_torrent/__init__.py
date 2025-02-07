@@ -4,7 +4,7 @@ from . import __main__, hook  # noqa: F401
 from .config import Config
 
 with contextlib.suppress(Exception):
-    from nonebot.plugin import PluginMetadata
+    from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
     __plugin_meta__ = PluginMetadata(
         name="游戏种子搜索",
@@ -13,6 +13,6 @@ with contextlib.suppress(Exception):
         homepage="https://github.com/Cvandia/nonebot-plugin-game-torrent",
         config=Config,
         type="application",
-        supported_adapters=None,
+        supported_adapters=inherit_supported_adapters("nonebot_plugin_alconna"),
         extra={"author": "Cvandia", "email": "1141538825@qq.com"},
     )

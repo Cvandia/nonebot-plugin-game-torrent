@@ -4,23 +4,33 @@ File: __main__.py
 """
 
 from dataclasses import dataclass
-from typing import Any
 
-from nonebot import on_command, require
+from nonebot import logger, require
 from nonebot.adapters import Event
 from nonebot.matcher import Matcher
-from nonebot.params import CommandArg
 
 require("nonebot_plugin_waiter")
+require("nonebot_plugin_alconna")
 
 from typing import TYPE_CHECKING
 
+from nonebot_plugin_alconna import (
+    Alconna,
+    Args,
+    Match,
+    MultiVar,
+    Subcommand,
+    UniMessage,
+    on_alconna,
+)
 from nonebot_plugin_waiter import waiter
 
+from .config import plugin_config
 from .exception import RequestError
 
 # 新的源在此导入
 from .fetcher import AHF, FGF, BaseFetcher
+from .utils import url2qrcode_bytes
 
 if TYPE_CHECKING:
     from .fetcher import TorrentTag
@@ -38,9 +48,30 @@ class Source:
 
 g_source = Source(_list=[AHF(), FGF()], _index=0)  # 在此添加新的源
 
-match = on_command("种子", aliases={"游戏种子", "游戏下载"}, priority=25)
-show_source = on_command("显示源", aliases={"显示种子库", "全部源"}, priority=26)
-change_source = on_command("更换源", aliases={"更换种子库", "换源"}, priority=27)
+match = on_alconna(
+    Alconna(
+        "游戏搜索",
+        Args["content?#内容", MultiVar("str")],
+    ),
+    aliases={"搜索游戏"},
+    use_cmd_start=True,
+)
+source = on_alconna(
+    Alconna(
+        "种子源",
+        Subcommand(
+            "show",
+            alias={"显示", "查看"},
+        ),
+        Subcommand(
+            "change",
+            Args["source_index?#源序号", str],
+            alias={"更换", "切换"},
+        ),
+    ),
+    aliases={"源"},
+    use_cmd_start=True,
+)
 
 
 async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> str:
@@ -64,9 +95,10 @@ async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> st
 @match.handle()
 async def event_matcher(
     matcher: Matcher,
-    search_args: Any = CommandArg(),  # noqa
+    content: Match[tuple[str, ...]],
 ):
-    game_name = str(search_args).strip()
+    game_name = " ".join(content.result) if content.available else None
+    logger.debug(f"匹配到指令：{content.result}, 游戏名称：{game_name}")
     if not game_name:
         game_name = await get_user_input(
             matcher, "请输入您想搜索的游戏名称。(仅支持英文搜索)"
@@ -98,11 +130,14 @@ async def event_matcher(
         await match.finish("未找到游戏资源。")
     if not game_resource.is_hacked:
         await match.send("警告：该游戏不是破解版，请合法下载。")
+    if plugin_config.magnet_to_qrcode:
+        # 生成二维码
+        await UniMessage.image(raw=url2qrcode_bytes(game_resource.magnet)).finish()
     await match.finish(str(game_resource))
     # 上传种子文件至群文件（未完成）
 
 
-@show_source.handle()
+@source.assign("show")
 async def _(matcher: Matcher):
     await matcher.finish(
         "当前源："
@@ -116,12 +151,13 @@ async def _(matcher: Matcher):
     )
 
 
-@change_source.handle()
-async def _(matcher: Matcher, source_index: Any = CommandArg()):  # noqa
-    _index = str(source_index).strip()
-    if not _index:
-        _index = await get_user_input(matcher, "请输入您想更换的源的序号。")
-    if not _index.isdigit() or int(_index) > len(g_source._list) or int(_index) < 1:
+@source.assign("change")
+async def _(matcher: Matcher, source_index: Match[tuple[str, ...]]):
+    index = source_index.result if source_index.available else None
+    logger.debug(f"匹配到指令：{source_index.result}, 源序号：{index}")
+    if not index:
+        index = await get_user_input(matcher, "请输入您想更换的源的序号。")
+    if not index.isdigit() or int(index) > len(g_source._list) or int(index) < 1:
         await matcher.finish("无效的序号。")
-    g_source._index = int(_index) - 1
+    g_source._index = int(index) - 1
     await matcher.finish("已更换至" + g_source._list[g_source._index].fetch_name)
