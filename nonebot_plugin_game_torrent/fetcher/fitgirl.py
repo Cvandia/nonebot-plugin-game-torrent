@@ -37,7 +37,7 @@ class FitgirlFetcher(BaseFetcher):
             tags.append(TorrentTag(game_name=a.text, url=a["href"]))
         return tags
 
-    async def fetch(self, tag: TorrentTag) -> Optional[TorrentResource]:
+    async def fetch(self, tag: TorrentTag) -> TorrentResource | None:
         try:
             rsp = await self.client.get(tag.url)
         except HTTPError as e:
