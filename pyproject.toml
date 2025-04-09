@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-game-torrent"
-version = "0.2.3"
+version = "0.2.4"
 description = "NoneBot 插件 - 游戏磁力链接查询 Aimheaven"
 authors = [
     {name = "Cvandia", email = "106718176+Cvandia@users.noreply.github.com"},
