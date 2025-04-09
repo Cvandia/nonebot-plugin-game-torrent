@@ -15,6 +15,7 @@ async def check_source():
     """
 
     if not CONFIG_PATH.exists():
+        Path.mkdir(CONFIG_PATH.parent, exist_ok=True)
         with Path.open(CONFIG_PATH, mode="w") as f:
             f.write("0")
     with Path.open(CONFIG_PATH, mode="r") as f:
