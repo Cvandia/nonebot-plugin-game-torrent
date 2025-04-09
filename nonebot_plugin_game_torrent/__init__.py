@@ -9,7 +9,7 @@ with contextlib.suppress(Exception):
     __plugin_meta__ = PluginMetadata(
         name="游戏种子搜索",
         description="搜索游戏种子资源",
-        usage="种子 [游戏名称]",
+        usage="搜索游戏 [游戏名称]",
         homepage="https://github.com/Cvandia/nonebot-plugin-game-torrent",
         config=Config,
         type="application",
