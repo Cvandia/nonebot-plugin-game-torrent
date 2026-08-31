@@ -64,7 +64,7 @@ class BaseFetcher(ABC):
     fetch_name: str
     # 爬取源的基础url
     base_url: str
-    _client: Optional[AsyncClient] = None
+    _client: AsyncClient | None = None
 
     _headers: ClassVar[dict] = {
         "User-Agent": UserAgent().chrome,
@@ -96,7 +96,7 @@ class BaseFetcher(ABC):
         """
 
     @abstractmethod
-    async def fetch(self, tag: TorrentTag) -> Optional[TorrentResource]:
+    async def fetch(self, tag: TorrentTag) -> TorrentResource | None:
         """
         获取种子资源
         """

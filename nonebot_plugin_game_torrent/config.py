@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 
 class Config(BaseModel):
-    torrent_send_format: Optional[str] = (
+    torrent_send_format: str | None = (
         "game: {game_name}\nsize: {size}\nlast_update: {last_update}\nmagnet: {magnet}\n"
     )
 
