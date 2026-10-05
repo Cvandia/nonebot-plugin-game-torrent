@@ -42,7 +42,7 @@ class AimhavenFetcher(BaseFetcher):
                 tags.append(TorrentTag(game_name=a["title"], url=a["href"]))
         return tags
 
-    async def fetch(self, tag: TorrentTag) -> Optional[TorrentResource]:
+    async def fetch(self, tag: TorrentTag) -> TorrentResource | None:
         """
         获取种子资源
 
