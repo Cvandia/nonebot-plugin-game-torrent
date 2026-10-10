@@ -14,6 +14,7 @@ from nonebot_plugin_game_torrent import __main__ as plugin
 from nonebot_plugin_game_torrent import hook
 from nonebot_plugin_game_torrent.exception import RequestError
 from nonebot_plugin_game_torrent.fetcher import AHF, FGF, TorrentTag
+from nonebot_plugin_game_torrent.source import SourceManager
 from nonebot_plugin_game_torrent.utils import url2qrcode_bytes
 
 
@@ -30,39 +31,40 @@ async def test_startup_and_shutdown_persist_source(tmp_path, monkeypatch, saved)
     if saved is not None:
         path.parent.mkdir()
         path.write_text(saved, encoding="utf-8")
-    monkeypatch.setattr(hook, "CONFIG_PATH", path)
-    monkeypatch.setattr(plugin, "g_source", plugin.Source(_list=[AHF(), FGF(), AHF()]))
+    manager = SourceManager((AHF(), FGF(), AHF()), path)
+    monkeypatch.setattr(hook, "get_source_manager", lambda: manager)
     await hook.check_source()
-    assert plugin.g_source._index == (2 if saved == "2" else 0)
-    client = plugin.g_source._list[0].client
-    plugin.g_source._index = 1
+    assert manager.current_index == (2 if saved == "2" else 0)
+    client = manager.fetchers[0].client
+    manager.select(1)
     await hook.save_source()
     assert await asyncio.to_thread(path.read_text, encoding="utf-8") == "1"
     assert client.is_closed
 
 
-async def test_shutdown_closes_clients_when_config_write_fails(monkeypatch):
-    monkeypatch.setattr(plugin, "g_source", plugin.Source(_list=[AHF()]))
+async def test_shutdown_closes_clients_when_config_write_fails(monkeypatch, tmp_path):
+    manager = SourceManager((AHF(),), tmp_path / "source.text")
+    monkeypatch.setattr(hook, "get_source_manager", lambda: manager)
 
-    def fail_write():
+    def fail_write(_index):
         raise PermissionError("read-only config")
 
-    monkeypatch.setattr(hook, "_write_source", fail_write)
-    client = plugin.g_source._list[0].client
+    monkeypatch.setattr(manager, "_write_index", fail_write)
+    client = manager.current.client
     await hook.save_source()
     assert client.is_closed
 
 
 @pytest.mark.parametrize("value", ["0", "4", "-1", "²", "abc"])
-async def test_invalid_source_selection(monkeypatch, value):
-    monkeypatch.setattr(plugin, "g_source", plugin.Source(_list=[AHF(), FGF()]))
+async def test_invalid_source_selection(tmp_path, value):
+    manager = SourceManager((AHF(), FGF()), tmp_path / "source.text")
     matcher = SimpleNamespace(finish=AsyncMock(side_effect=FinishedException))
     with pytest.raises(FinishedException):
         await plugin.change_source(
-            matcher, SimpleNamespace(available=True, result=value)
+            matcher, SimpleNamespace(available=True, result=value), manager
         )
     matcher.finish.assert_awaited_once_with("无效的序号。")
-    assert plugin.g_source._index == 0
+    assert manager.current_index == 0
 
 
 @pytest.mark.parametrize("fetcher_type", [AHF, FGF])

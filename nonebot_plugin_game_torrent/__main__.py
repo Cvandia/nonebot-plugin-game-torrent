@@ -3,16 +3,15 @@ File: __main__.py
     Description: 插件主要mathcer逻辑
 """
 
-from dataclasses import dataclass, field
-
 from nonebot import logger, require
 from nonebot.adapters import Event
 from nonebot.matcher import Matcher
+from nonebot.params import Depends
 
 require("nonebot_plugin_waiter")
 require("nonebot_plugin_alconna")
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
 from nonebot_plugin_alconna import (
     Alconna,
@@ -27,26 +26,12 @@ from nonebot_plugin_waiter import waiter
 
 from .config import plugin_config
 from .exception import RequestError
-
-# 新的源在此导入
-from .fetcher import AHF, FGF, ZYKF, BaseFetcher
+from .source import SourceManager, get_source_manager
 from .utils import url2qrcode_bytes
 
 if TYPE_CHECKING:
     from .fetcher import TorrentTag
 
-
-@dataclass
-class Source:
-    """
-    搜索器列表
-    """
-
-    _list: list[BaseFetcher] = field(default_factory=list)
-    _index: int = 0
-
-
-g_source = Source(_list=[AHF(), FGF(), ZYKF()], _index=0)  # 在此添加新的源
 
 match = on_alconna(
     Alconna(
@@ -97,6 +82,7 @@ async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> st
 async def event_matcher(
     matcher: Matcher,
     content: Match[tuple[str, ...]],
+    source_manager: Annotated[SourceManager, Depends(get_source_manager)],
 ):
     game_name = " ".join(content.result) if content.available else None
     logger.debug(f"匹配到指令：{content.result}, 游戏名称：{game_name}")
@@ -105,7 +91,7 @@ async def event_matcher(
             matcher, "请输入您想搜索的游戏名称。(Aimhaven、Fitgirl 请使用英文)"
         )
 
-    fetcher = g_source._list[g_source._index]
+    fetcher = source_manager.current
     await match.send("正在搜索...")
     try:
         tags: list[TorrentTag] = await fetcher.search(keyword=game_name)  # 搜索游戏
@@ -139,27 +125,34 @@ async def event_matcher(
 
 
 @source.assign("show")
-async def show_source(matcher: Matcher):
+async def show_source(
+    matcher: Matcher,
+    source_manager: Annotated[SourceManager, Depends(get_source_manager)],
+):
     await matcher.finish(
         "当前源："
-        + g_source._list[g_source._index].fetch_name
+        + source_manager.current.fetch_name
         + "\n"
         + "源列表：\n"
         + "\n".join(
             f"{index + 1}. {fetcher.fetch_name}"
-            for index, fetcher in enumerate(g_source._list)
+            for index, fetcher in enumerate(source_manager.fetchers)
         )
     )
 
 
 @source.assign("change")
-async def change_source(matcher: Matcher, source_index: Match[str]):
+async def change_source(
+    matcher: Matcher,
+    source_index: Match[str],
+    source_manager: Annotated[SourceManager, Depends(get_source_manager)],
+):
     index = source_index.result if source_index.available else None
     logger.debug(f"匹配到指令：{source_index.result}, 源序号：{index}")
     if not index:
         index = await get_user_input(matcher, "请输入您想更换的源的序号。")
     index = index.strip()
-    if not index.isdecimal() or not 1 <= int(index) <= len(g_source._list):
+    if not index.isdecimal() or not 1 <= int(index) <= len(source_manager.fetchers):
         await matcher.finish("无效的序号。")
-    g_source._index = int(index) - 1
-    await matcher.finish("已更换至" + g_source._list[g_source._index].fetch_name)
+    source_manager.select(int(index) - 1)
+    await matcher.finish("已更换至" + source_manager.current.fetch_name)

@@ -11,6 +11,7 @@ from nonebot.exception import FinishedException
 from nonebot_plugin_game_torrent import __main__ as plugin
 from nonebot_plugin_game_torrent.exception import RequestError
 from nonebot_plugin_game_torrent.fetcher import ZYKF, TorrentTag
+from nonebot_plugin_game_torrent.source import SourceManager
 
 pytestmark = pytest.mark.asyncio
 
@@ -171,15 +172,13 @@ async def test_search_follows_redirect(make_fetcher):
     assert len(await make_fetcher(handler).search("Game")) == 1
 
 
-async def test_source_command_switches_to_zyk123():
-    previous_index = plugin.g_source._index
+async def test_source_command_switches_to_zyk123(tmp_path):
+    manager = SourceManager((ZYKF(), ZYKF(), ZYKF()), tmp_path / "source.text")
     matcher = SimpleNamespace(finish=AsyncMock(side_effect=FinishedException))
-    try:
-        with pytest.raises(FinishedException):
-            await plugin.change_source(
-                matcher, SimpleNamespace(available=True, result="3")
-            )
-        assert isinstance(plugin.g_source._list[plugin.g_source._index], ZYKF)
-        matcher.finish.assert_awaited_once_with("已更换至123资源库")
-    finally:
-        plugin.g_source._index = previous_index
+    with pytest.raises(FinishedException):
+        await plugin.change_source(
+            matcher, SimpleNamespace(available=True, result="3"), manager
+        )
+    assert manager.current is manager.fetchers[-1]
+    assert isinstance(manager.current, ZYKF)
+    matcher.finish.assert_awaited_once_with("已更换至123资源库")

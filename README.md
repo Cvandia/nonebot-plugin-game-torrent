@@ -102,6 +102,13 @@ uv lock --upgrade
 
 ## ⚙️ 配置
 
+当前源由 `nonebot-plugin-localstore` 管理，保存至插件配置目录中的
+`game_torrent.text`，启动时读取，正常关闭时保存；源选择仍由整个机器人共享。
+可通过 localstore 的 `LOCALSTORE_CONFIG_DIR` 或 `LOCALSTORE_PLUGIN_CONFIG_DIR`
+配置存储位置，详见 [localstore 文档](https://github.com/nonebot/plugin-localstore)。
+升级时，若新位置没有配置，会自动读取旧的 `./config/game_torrent.text` 并迁移，
+保留原文件；已有新配置优先。
+
 **在env.中添加以下配置**
 
 |        配置         | 类型  | 必填项 |                                      默认值                                       |             说明             |

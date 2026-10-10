@@ -4,6 +4,7 @@ from nonebug import NONEBOT_START_LIFESPAN
 
 nonebot.init(driver="~none")
 nonebot.get_driver().register_adapter(Adapter)
+nonebot.load_plugin("nonebot_plugin_game_torrent")
 
 
 def pytest_configure(config):
