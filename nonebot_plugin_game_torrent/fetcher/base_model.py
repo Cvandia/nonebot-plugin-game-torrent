@@ -4,7 +4,7 @@ File: base_model.py
 """
 
 from abc import ABC, abstractmethod
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from fake_useragent import UserAgent
 from httpx import AsyncClient
@@ -39,7 +39,8 @@ class TorrentResource(BaseModel):
     is_hacked: bool = True
 
     def _to_str(self) -> str:
-        return torrent_send_format.format(**self.dict())
+        data = self.model_dump() if hasattr(self, "model_dump") else self.dict()
+        return torrent_send_format.format(**data)
 
     def __str__(self) -> str:
         return self._to_str()
@@ -64,7 +65,7 @@ class BaseFetcher(ABC):
     fetch_name: str
     # 爬取源的基础url
     base_url: str
-    _client: Optional[AsyncClient] = None
+    _client: AsyncClient | None = None
 
     _headers: ClassVar[dict] = {
         "User-Agent": UserAgent().chrome,
@@ -72,13 +73,19 @@ class BaseFetcher(ABC):
 
     @property
     def client(self) -> AsyncClient:
-        if not self._client:
+        if self._client is None or self._client.is_closed:
             self._client = AsyncClient(
                 base_url=self.base_url or "",
                 headers=self._headers,
                 timeout=100,
+                follow_redirects=True,
             )
         return self._client
+
+    async def aclose(self) -> None:
+        if self._client is not None:
+            await self._client.aclose()
+            self._client = None
 
     @classmethod
     def set_headers(cls, key: str, value: str) -> None:
@@ -96,7 +103,7 @@ class BaseFetcher(ABC):
         """
 
     @abstractmethod
-    async def fetch(self, tag: TorrentTag) -> Optional[TorrentResource]:
+    async def fetch(self, tag: TorrentTag) -> TorrentResource | None:
         """
         获取种子资源
         """

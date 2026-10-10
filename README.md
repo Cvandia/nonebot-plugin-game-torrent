@@ -73,6 +73,33 @@ git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
 
 </details>
 
+## 开发
+
+开发环境需要 Python 3.10+ 和 [uv](https://docs.astral.sh/uv/getting-started/installation/)。
+
+```bash
+git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
+cd nonebot-plugin-game-torrent
+uv sync --locked --all-groups
+```
+
+常用命令：
+
+```bash
+# 运行代码检查
+uv run ruff check .
+# 运行测试
+uv run --all-groups pytest -q
+# 构建源码包和 wheel
+uv build
+# 添加依赖（同时更新 pyproject.toml 和 uv.lock）
+uv add <package>
+# 更新锁定的依赖版本
+uv lock --upgrade
+```
+
+请将 `uv.lock` 提交到版本控制中，以保持开发和 CI 的依赖一致。
+
 ## ⚙️ 配置
 
 **在env.中添加以下配置**
@@ -93,6 +120,14 @@ git clone https://github.com/Cvandia/nonebot-plugin-game-torrent
 |  种子源  |    否    | 群聊、私聊 |  管理种子源  | 所有人 |
 
 ### 示例：
+
+可用源：`1. Aimhaven`、`2. Fitgirl`、`3. 123资源库`。
+使用 `/种子源 show` 查看当前源，使用 `/种子源 change 3` 切换到 123资源库，
+然后通过 `/游戏搜索 奥日` 搜索（123资源库支持中文关键词）。
+
+123资源库返回正文中的公开磁力链接或网盘分享链接；网盘链接沿用输出中的
+`magnet` 字段，也支持二维码发送。仅返回第一个可用资源链接，不解析网盘跳转，
+也不自动下载文件；页面没有提供的大小或更新时间显示为 `Unknown`。
 
 - `/游戏搜索 赛博朋克2077`
 - `/搜索游戏 艾尔登法环`

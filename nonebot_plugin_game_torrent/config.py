@@ -3,16 +3,12 @@ File: config.py
     Description: 插件配置文件
 """
 
-from typing import Optional
-
 from nonebot import get_plugin_config
 from pydantic import BaseModel
 
 
 class Config(BaseModel):
-    torrent_send_format: Optional[str] = (
-        "game: {game_name}\nsize: {size}\nlast_update: {last_update}\nmagnet: {magnet}\n"
-    )
+    torrent_send_format: str = "game: {game_name}\nsize: {size}\nlast_update: {last_update}\nmagnet: {magnet}\n"
 
     # TODO 是否上传种子文件至群文件
 

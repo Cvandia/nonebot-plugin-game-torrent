@@ -7,7 +7,7 @@ File: aimehaven.py
 Author: Cvandia
 """
 
-from typing import Optional
+from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 from httpx import HTTPError
@@ -32,17 +32,19 @@ class AimhavenFetcher(BaseFetcher):
         """
         try:
             response = await self.client.get("", params={"s": keyword})
+            response.raise_for_status()
         except HTTPError as e:
             raise RequestError(f"Aimhaven search error: {e}") from e
         soup = BeautifulSoup(response.text, "html.parser")
-        tags = []
-        if h2s := soup.find_all("h2", class_="title front-view-title"):
-            for h2 in h2s:
-                a = h2.find("a")
-                tags.append(TorrentTag(game_name=a["title"], url=a["href"]))
-        return tags
+        return [
+            TorrentTag(
+                game_name=a.get("title") or a.get_text(strip=True),
+                url=urljoin(str(response.url), a["href"]),
+            )
+            for a in soup.select("h2.title.front-view-title a[href]")
+        ]
 
-    async def fetch(self, tag: TorrentTag) -> Optional[TorrentResource]:
+    async def fetch(self, tag: TorrentTag) -> TorrentResource | None:
         """
         获取种子资源
 
@@ -50,11 +52,14 @@ class AimhavenFetcher(BaseFetcher):
         """
         try:
             response = await self.client.get(tag.url)
+            response.raise_for_status()
         except HTTPError as e:
             raise RequestError(f"Aimhaven fetch error: {e}") from e
         soup = BeautifulSoup(response.text, "html.parser")
+        size = "Unknown"
+        time = "Unknown"
         if figcaption := soup.find("figcaption", class_="wp-element-caption"):
-            size = figcaption.get_text().strip("Size: ")
+            size = figcaption.get_text(strip=True).removeprefix("Size:").strip()
         if (i := soup.find("i", class_="fa fa-calendar")) and (
             span := i.find_next("span")
         ):
@@ -63,10 +68,10 @@ class AimhavenFetcher(BaseFetcher):
         if soup.find("mark", class_="has-vivid-red-color"):
             is_hacked = False
         figure = soup.find("figure", class_="aligncenter")
-        if a := figure.find("a"):
+        if figure and (a := figure.find("a", href=True)):
             if figure := figure.find_next("figure", class_="aligncenter"):
-                a = figure.find("a")
-            magnet = a["href"]
+                a = figure.find("a", href=True) or a
+            magnet = urljoin(str(response.url), a["href"])
             return TorrentResource(
                 game_name=tag.game_name,
                 magnet=magnet,  # type: ignore

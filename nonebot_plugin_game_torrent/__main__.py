@@ -3,7 +3,7 @@ File: __main__.py
     Description: 插件主要mathcer逻辑
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from nonebot import logger, require
 from nonebot.adapters import Event
@@ -29,7 +29,7 @@ from .config import plugin_config
 from .exception import RequestError
 
 # 新的源在此导入
-from .fetcher import AHF, FGF, BaseFetcher
+from .fetcher import AHF, FGF, ZYKF, BaseFetcher
 from .utils import url2qrcode_bytes
 
 if TYPE_CHECKING:
@@ -42,11 +42,11 @@ class Source:
     搜索器列表
     """
 
-    _list: list[BaseFetcher] = None
+    _list: list[BaseFetcher] = field(default_factory=list)
     _index: int = 0
 
 
-g_source = Source(_list=[AHF(), FGF()], _index=0)  # 在此添加新的源
+g_source = Source(_list=[AHF(), FGF(), ZYKF()], _index=0)  # 在此添加新的源
 
 match = on_alconna(
     Alconna(
@@ -85,6 +85,7 @@ async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> st
         return event.get_plaintext()
 
     user_input = await wait_for_user_input.wait(timeout=timeout)
+    user_input = user_input.strip() if user_input else ""
     if not user_input:
         await matcher.finish("输入超时。")
     elif user_input.lower() in ["取消", "cancel", "quit", "q"]:
@@ -101,7 +102,7 @@ async def event_matcher(
     logger.debug(f"匹配到指令：{content.result}, 游戏名称：{game_name}")
     if not game_name:
         game_name = await get_user_input(
-            matcher, "请输入您想搜索的游戏名称。(仅支持英文搜索)"
+            matcher, "请输入您想搜索的游戏名称。(Aimhaven、Fitgirl 请使用英文)"
         )
 
     fetcher = g_source._list[g_source._index]
@@ -120,7 +121,7 @@ async def event_matcher(
     )
     user_input = await get_user_input(matcher, "请输入您想下载的游戏的序号。")
 
-    if not user_input.isdigit() or int(user_input) > len(tags) or int(user_input) < 1:
+    if not user_input.isdecimal() or not 1 <= int(user_input) <= len(tags):
         await matcher.finish("无效的序号。")
     try:
         game_resource = await fetcher.fetch(tags[int(user_input) - 1])
@@ -138,7 +139,7 @@ async def event_matcher(
 
 
 @source.assign("show")
-async def _(matcher: Matcher):
+async def show_source(matcher: Matcher):
     await matcher.finish(
         "当前源："
         + g_source._list[g_source._index].fetch_name
@@ -152,12 +153,13 @@ async def _(matcher: Matcher):
 
 
 @source.assign("change")
-async def _(matcher: Matcher, source_index: Match[tuple[str, ...]]):
+async def change_source(matcher: Matcher, source_index: Match[str]):
     index = source_index.result if source_index.available else None
     logger.debug(f"匹配到指令：{source_index.result}, 源序号：{index}")
     if not index:
         index = await get_user_input(matcher, "请输入您想更换的源的序号。")
-    if not index.isdigit() or int(index) > len(g_source._list) or int(index) < 1:
+    index = index.strip()
+    if not index.isdecimal() or not 1 <= int(index) <= len(g_source._list):
         await matcher.finish("无效的序号。")
     g_source._index = int(index) - 1
     await matcher.finish("已更换至" + g_source._list[g_source._index].fetch_name)
