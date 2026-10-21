@@ -10,7 +10,7 @@ require("nonebot_plugin_localstore")
 
 import nonebot_plugin_localstore as store
 
-from .fetcher import AHF, FGF, ZYKF, BaseFetcher
+from .fetcher import AHF, FGF, G520F, ZYKF, BaseFetcher
 
 
 class SourceManager:
@@ -95,7 +95,7 @@ class SourceManager:
 def get_source_manager() -> SourceManager:
     """提供插件级共享实例，供依赖注入和生命周期回调使用。"""
     return SourceManager(
-        fetchers=(AHF(), FGF(), ZYKF()),
+        fetchers=(AHF(), FGF(), ZYKF(), G520F()),
         config_file=store.get_plugin_config_file("game_torrent.text"),
         # 仅用于兼容旧版本；所有写入均使用 localstore 返回的位置。
         legacy_file=Path("config/game_torrent.text"),
