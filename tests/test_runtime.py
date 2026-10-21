@@ -63,7 +63,7 @@ async def test_invalid_source_selection(tmp_path, value):
         await plugin.change_source(
             matcher, SimpleNamespace(available=True, result=value), manager
         )
-    matcher.finish.assert_awaited_once_with("无效的序号。")
+    matcher.finish.assert_awaited_once_with("来源无效，请发送 /游戏源 查看编号和名称。")
     assert manager.current_index == 0
 
 

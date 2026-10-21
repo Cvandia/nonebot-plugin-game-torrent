@@ -3,7 +3,7 @@ File: __main__.py
     Description: 插件主要mathcer逻辑
 """
 
-from nonebot import logger, require
+from nonebot import get_driver, logger, require
 from nonebot.adapters import Event
 from nonebot.matcher import Matcher
 from nonebot.params import Depends
@@ -38,7 +38,7 @@ match = on_alconna(
         "游戏搜索",
         Args["content?#内容", MultiVar("str")],
     ),
-    aliases={"搜索游戏"},
+    aliases={"搜索游戏", "搜游戏"},
     use_cmd_start=True,
 )
 source = on_alconna(
@@ -57,6 +57,44 @@ source = on_alconna(
     aliases={"源"},
     use_cmd_start=True,
 )
+source_list = on_alconna(Alconna("游戏源"), use_cmd_start=True)
+source_change = on_alconna(
+    Alconna("切换源", Args["source_index?#编号或名称", str]),
+    aliases={"切换游戏源"},
+    use_cmd_start=True,
+)
+game_help = on_alconna(Alconna("游戏帮助"), use_cmd_start=True)
+
+
+def command_example(command: str) -> str:
+    prefixes = get_driver().config.command_start
+    prefix = "/" if "/" in prefixes else next(iter(sorted(prefixes)), "")
+    return prefix + command
+
+
+def source_menu(manager: SourceManager) -> str:
+    return (
+        f"当前游戏源：{manager.current.fetch_name}\n"
+        + "\n".join(
+            f"{index + 1}. {fetcher.fetch_name}"
+            for index, fetcher in enumerate(manager.fetchers)
+        )
+        + f"\n发送 {command_example('切换源 ' + str(len(manager.fetchers)))}"
+        + f" 或 {command_example('切换源 ' + manager.fetchers[-1].fetch_name)} 切换。"
+        + "\n切换会对整个机器人生效。"
+    )
+
+
+@game_help.handle()
+async def show_help(matcher: Matcher):
+    await matcher.finish(
+        "游戏查询指令\n"
+        f"{command_example('搜游戏 游戏名')}：搜索游戏，回复编号获取链接\n"
+        f"{command_example('游戏源')}：查看当前网站和网站列表\n"
+        f"{command_example('切换源 编号或名称')}：切换网站\n"
+        "等待输入时，发送“取消”结束；60 秒未回复自动结束。\n"
+        "Aimhaven、Fitgirl 请用英文游戏名；切换网站对整个机器人生效。"
+    )
 
 
 async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> str:
@@ -72,7 +110,9 @@ async def get_user_input(matcher: Matcher, prompt: str, timeout: int = 60) -> st
     user_input = await wait_for_user_input.wait(timeout=timeout)
     user_input = user_input.strip() if user_input else ""
     if not user_input:
-        await matcher.finish("输入超时。")
+        await matcher.finish(
+            f"等待回复超时，已结束。发送 {command_example('游戏帮助')} 查看用法。"
+        )
     elif user_input.lower() in ["取消", "cancel", "quit", "q"]:
         await matcher.finish("操作已取消。")
     return user_input
@@ -88,59 +128,64 @@ async def event_matcher(
     logger.debug(f"匹配到指令：{content.result}, 游戏名称：{game_name}")
     if not game_name:
         game_name = await get_user_input(
-            matcher, "请输入您想搜索的游戏名称。(Aimhaven、Fitgirl 请使用英文)"
+            matcher, "请回复游戏名（Aimhaven、Fitgirl 请用英文），或发送“取消”。"
         )
 
     fetcher = source_manager.current
-    await match.send("正在搜索...")
+    await matcher.send(f"正在 {fetcher.fetch_name} 搜索“{game_name}”…")
     try:
         tags: list[TorrentTag] = await fetcher.search(keyword=game_name)  # 搜索游戏
     except RequestError as e:
-        await match.finish(f"搜索失败: {e}")
+        logger.warning(f"{fetcher.fetch_name} 搜索失败: {e}")
+        await matcher.finish(
+            f"当前网站搜索失败，请稍后重试，或发送 {command_example('游戏源')} 更换网站。"
+        )
 
     if not tags:
-        await match.finish("未找到游戏。")
+        await matcher.finish(
+            f"未找到“{game_name}”。请换个关键词，或发送 {command_example('游戏源')} 更换网站。"
+        )
 
-    await match.send(
-        "以下是搜索结果：\n"
-        + "\n".join(f"{index + 1}. {tag}\n" for index, tag in enumerate(tags))
+    await matcher.send(
+        f"{fetcher.fetch_name} 搜索结果：\n"
+        + "\n".join(f"{index + 1}. {tag.game_name}" for index, tag in enumerate(tags))
     )
-    user_input = await get_user_input(matcher, "请输入您想下载的游戏的序号。")
+    user_input = await get_user_input(
+        matcher, f"回复编号 1–{len(tags)} 获取链接，或发送“取消”（60 秒内）。"
+    )
 
     if not user_input.isdecimal() or not 1 <= int(user_input) <= len(tags):
-        await matcher.finish("无效的序号。")
+        await matcher.finish(
+            f"编号无效，请重新发送 {command_example('搜游戏 ' + game_name)}，并选择 1–{len(tags)}。"
+        )
     try:
         game_resource = await fetcher.fetch(tags[int(user_input) - 1])
     except RequestError as e:
-        await match.finish(f"获取游戏资源失败: {e}")
+        logger.warning(f"{fetcher.fetch_name} 获取资源失败: {e}")
+        await matcher.finish("当前网站获取链接失败，请稍后重试或切换网站。")
     if not game_resource:
-        await match.finish("未找到游戏资源。")
+        await matcher.finish(
+            "该页面没有可用的公开资源链接，请换一个结果或切换网站重新搜索。"
+        )
     if not game_resource.is_hacked:
-        await match.send("警告：该游戏不是破解版，请合法下载。")
+        await matcher.send("请按游戏发布页面的说明获取资源。")
     if plugin_config.magnet_to_qrcode:
         # 生成二维码
         await UniMessage.image(raw=url2qrcode_bytes(game_resource.magnet)).finish()
-    await match.finish(str(game_resource))
+    await matcher.finish(str(game_resource))
     # 上传种子文件至群文件（未完成）
 
 
+@source_list.handle()
 @source.assign("show")
 async def show_source(
     matcher: Matcher,
     source_manager: Annotated[SourceManager, Depends(get_source_manager)],
 ):
-    await matcher.finish(
-        "当前源："
-        + source_manager.current.fetch_name
-        + "\n"
-        + "源列表：\n"
-        + "\n".join(
-            f"{index + 1}. {fetcher.fetch_name}"
-            for index, fetcher in enumerate(source_manager.fetchers)
-        )
-    )
+    await matcher.finish(source_menu(source_manager))
 
 
+@source_change.handle()
 @source.assign("change")
 async def change_source(
     matcher: Matcher,
@@ -150,9 +195,28 @@ async def change_source(
     index = source_index.result if source_index.available else None
     logger.debug(f"匹配到指令：{source_index.result}, 源序号：{index}")
     if not index:
-        index = await get_user_input(matcher, "请输入您想更换的源的序号。")
+        index = await get_user_input(
+            matcher,
+            source_menu(source_manager) + "\n请回复编号或网站名称，或发送“取消”。",
+        )
     index = index.strip()
-    if not index.isdecimal() or not 1 <= int(index) <= len(source_manager.fetchers):
-        await matcher.finish("无效的序号。")
-    source_manager.select(int(index) - 1)
+    selected = next(
+        (
+            i
+            for i, fetcher in enumerate(source_manager.fetchers)
+            if fetcher.fetch_name.casefold() == index.casefold()
+        ),
+        None,
+    )
+    if (
+        selected is None
+        and index.isdecimal()
+        and 1 <= int(index) <= len(source_manager.fetchers)
+    ):
+        selected = int(index) - 1
+    if selected is None:
+        await matcher.finish(
+            f"来源无效，请发送 {command_example('游戏源')} 查看编号和名称。"
+        )
+    source_manager.select(selected)
     await matcher.finish("已更换至" + source_manager.current.fetch_name)

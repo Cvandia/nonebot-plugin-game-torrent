@@ -36,7 +36,8 @@ async def test_show_source_uses_injected_manager(tmp_path):
     with pytest.raises(FinishedException):
         await plugin.show_source(matcher, manager)
     matcher.finish.assert_awaited_once_with(
-        "当前源：123资源库\n源列表：\n1. Aimhaven\n2. Fitgirl\n3. 123资源库"
+        "当前游戏源：123资源库\n1. Aimhaven\n2. Fitgirl\n3. 123资源库"
+        "\n发送 /切换源 3 或 /切换源 123资源库 切换。\n切换会对整个机器人生效。"
     )
 
 
